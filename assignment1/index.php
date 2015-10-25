@@ -6,6 +6,7 @@ require_once(__DIR__ . '/include.php');
 
 require_once(__DIR__ . '/classes/Month.php');
 require_once(__DIR__ . '/classes/Report.php');
+require_once(__DIR__ . '/classes/CodeReport.php');
 require_once(__DIR__ . '/classes/SqlReport.php');
 
 date_default_timezone_set('Europe/Amsterdam');
@@ -25,10 +26,11 @@ if(isset($_GET['commission']) && in_array($_GET['commission'], $commissions)) {
 	$commission = (float) $_GET['commission'];
 }
 
-
-$result = new SqlReport($db, $period, $commission);
+$result = new CodeReport($db, $period, $commission);
 $result->run();
 
+// $result = new SqlReport($db, $period, $commission);
+// $result->run();
 
 ?>
 <!doctype html>
