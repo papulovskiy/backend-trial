@@ -3,6 +3,8 @@
 // Load database connection, helpers, etc.
 require_once(__DIR__ . '/errors.php');
 require_once(__DIR__ . '/include.php');
+require_once(__DIR__ . '/classes/Month.php');
+require_once(__DIR__ . '/classes/Report.php');
 
 date_default_timezone_set('Europe/Amsterdam');
 
