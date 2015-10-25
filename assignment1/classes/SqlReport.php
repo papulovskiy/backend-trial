@@ -51,8 +51,4 @@ SQL;
             $this->add($item->month, $item->bookers, $item->number_of_bookings, $item->turnover, $item->LTV);
         }
     }
-
-    protected function add($month, $bookers, $bookings, $turnover, $LTV) {
-        $this->items[] = new Month($month, $bookers, $bookings, $turnover, $LTV);
-    }
 }
