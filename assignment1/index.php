@@ -25,9 +25,9 @@ $sql = <<<SQL
 SELECT
     month,
     count(*) as bookers,
-    avg(bookings_count) as number_of_bookings,
-    avg(total_price) as turnover,
-    0.1*avg(total_price) as LTV
+    printf("%.2f", avg(bookings_count)) as number_of_bookings,
+    printf("%.2f", avg(total_price)) as turnover,
+    printf("%.2f", $commission*avg(total_price)) as LTV
 FROM
     (
         SELECT
@@ -36,7 +36,7 @@ FROM
             count(booking_id) as bookings_count,
             sum(locked_total_price) as total_price
         FROM
-            (   -- Selecting bookers with first booking end month
+            (   -- Selecting bookers with first booking month
                 SELECT
                     booker_id,
                     min(i.end_timestamp) as first_booking_timestamp,
@@ -54,7 +54,7 @@ FROM
             ON (b.booker_id = by_month.booker_id)
         JOIN
             bookingitems i
-            ON (i.booking_id=b.id AND i.end_timestamp < by_month.first_booking_timestamp+86400*30*18)
+            ON (i.booking_id=b.id AND i.end_timestamp < strftime('%s', date(datetime(by_month.first_booking_timestamp, 'unixepoch'), '+$period month')))
         GROUP BY
             by_month.booker_id,
             month
@@ -118,9 +118,9 @@ $result = $db->prepare($sql)->run();
 					<tr>
 						<td><?php echo $row->month;?></td>
 						<td><?php echo $row->bookers;?></td>
-						<td><?php echo $row->number_of_bookings;?></td>
-						<td><?php echo $row->turnover;?></td>
-						<td><?php echo $row->LTV;?></td>
+						<td class="right"><?php echo $row->number_of_bookings;?></td>
+						<td class="right"><?php echo $row->turnover;?></td>
+						<td class="right"><?php echo $row->LTV;?></td>
 					</tr>
 				<?php endforeach; ?>
 			</tbody>
