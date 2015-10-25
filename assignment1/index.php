@@ -13,10 +13,12 @@ date_default_timezone_set('Europe/Amsterdam');
 
 $periods     = [3, 12, 18];
 $commissions = [0.10, 0.15];
+$reports     = ['SqlReport', 'CodeReport'];
 
 // Default values
 $period = 12; // Life-Time of 12 months
 $commission = 0.10; // 10% commission
+$report = 'SqlReport';
 
 // Checking arguments
 if(isset($_GET['period']) && in_array($_GET['period'], $periods)) {
@@ -25,12 +27,12 @@ if(isset($_GET['period']) && in_array($_GET['period'], $periods)) {
 if(isset($_GET['commission']) && in_array($_GET['commission'], $commissions)) {
 	$commission = (float) $_GET['commission'];
 }
+if(isset($_GET['report']) && in_array($_GET['report'], $reports)) {
+	$report = $_GET['report'];
+}
 
-$result = new CodeReport($db, $period, $commission);
+$result = new $report($db, $period, $commission);
 $result->run();
-
-// $result = new SqlReport($db, $period, $commission);
-// $result->run();
 
 ?>
 <!doctype html>
@@ -65,6 +67,9 @@ $result->run();
 			Commission: <select name="commission"><?php echo implode('', array_map(function($c) use ($commission) {
 				return sprintf('<option value="%f" %s>%d %%</option>', $c, $c === $commission ? 'selected' : '', $c*100);
 			}, $commissions)); ?></select><br/>
+			Report engine: <select name="report"><?php echo implode('', array_map(function($r) use ($report) {
+				return sprintf('<option value="%s" %s>%s</option>', $r, $r === $report ? 'selected' : '', $r);
+			}, $reports)); ?></select><br/>
 			<button type="submit">Generate</button>
 		</form>
 		<h1>Report:</h1>
