@@ -5,9 +5,9 @@ class SqlReport extends Report {
         SELECT
             month,
             count(*) as bookers,
-            printf("%.2f", avg(bookings_count)) as number_of_bookings,
-            printf("%.2f", avg(total_price)) as turnover,
-            printf("%.2f", $this->commission*avg(total_price)) as LTV
+            avg(bookings_count) as number_of_bookings,
+            avg(total_price) as turnover,
+            $this->commission*avg(total_price) as LTV
         FROM
             (
                 SELECT

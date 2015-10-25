@@ -78,9 +78,9 @@ class CodeReport extends Report {
             $this->add(
                         $month,
                         $bookers_count,
-                        $bookers_count  > 0 ? sprintf("%.2f", $bookings_count/$bookers_count) : 0,
-                        $bookings_count > 0 ? sprintf("%.2f", $bookings_sum/$bookings_count) : 0,
-                        $bookings_count > 0 ? sprintf("%.2f", $this->commission * $bookings_sum/$bookings_count) : 0
+                        $bookers_count  > 0 ? ($bookings_count/$bookers_count) : 0,
+                        $bookings_count > 0 ? ($bookings_sum/$bookings_count) : 0,
+                        $bookings_count > 0 ? ($this->commission * $bookings_sum/$bookings_count) : 0
             );
         }
     }
