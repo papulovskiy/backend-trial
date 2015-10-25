@@ -6,6 +6,9 @@ require_once(__DIR__ . '/include.php');
 
 require_once(__DIR__ . '/classes/Month.php');
 require_once(__DIR__ . '/classes/Report.php');
+require_once(__DIR__ . '/classes/SqlReport.php');
+
+date_default_timezone_set('Europe/Amsterdam');
 
 $periods     = [3, 12, 18];
 $commissions = [0.10, 0.15];
@@ -23,13 +26,10 @@ if(isset($_GET['commission']) && in_array($_GET['commission'], $commissions)) {
 }
 
 
-// Prepare query
-$result = $db
-	->prepare('
-		SELECT * FROM bookings LIMIT 3
-	')
-	->run()
-;
+$result = new SqlReport($db, $period, $commission);
+$result->run();
+
+
 ?>
 <!doctype html>
 <html>
@@ -79,11 +79,11 @@ $result = $db
 			<tbody>
 				<?php foreach ($result as $index => $row): ?>
 					<tr>
-						<td>TODO</td>
-						<td>TODO</td>
-						<td>TODO</td>
-						<td>TODO</td>
-						<td>TODO</td>
+						<td><?php echo $row->label;?></td>
+						<td><?php echo $row->bookers;?></td>
+						<td class="right"><?php echo $row->bookings;?></td>
+						<td class="right"><?php echo $row->turnover;?></td>
+						<td class="right"><?php echo $row->LTV;?></td>
 					</tr>
 				<?php endforeach; ?>
 			</tbody>
