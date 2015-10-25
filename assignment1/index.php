@@ -4,6 +4,9 @@
 require_once(__DIR__ . '/errors.php');
 require_once(__DIR__ . '/include.php');
 
+require_once(__DIR__ . '/classes/Month.php');
+require_once(__DIR__ . '/classes/Report.php');
+
 $periods     = [3, 12, 18];
 $commissions = [0.10, 0.15];
 
