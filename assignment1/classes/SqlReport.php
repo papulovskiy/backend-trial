@@ -35,6 +35,8 @@ class SqlReport extends Report {
                 JOIN
                     bookingitems i
                     ON (i.booking_id=b.id AND i.end_timestamp < strftime('%s', date(datetime(by_month.first_booking_timestamp, 'unixepoch'), '+$this->period month')))
+                WHERE
+                    datetime(by_month.first_booking_timestamp, 'unixepoch') < date('now', '-$this->period month')
                 GROUP BY
                     by_month.booker_id,
                     month
