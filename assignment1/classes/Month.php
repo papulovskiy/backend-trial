@@ -11,8 +11,8 @@ class Month {
         $this->month    = $month;
         $this->label    = date("M Y", strtotime($month));
         $this->bookers  = $bookers;
-        $this->bookings = $bookings;
-        $this->turnover = $turnover;
-        $this->LTV      = $LTV;
+        $this->bookings = sprintf("%.2f", $bookings);
+        $this->turnover = sprintf("%.2f", $turnover);
+        $this->LTV      = sprintf("%.2f", $LTV);
     }
 }
