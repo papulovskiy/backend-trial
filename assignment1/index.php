@@ -6,6 +6,9 @@ require_once(__DIR__ . '/include.php');
 
 require_once(__DIR__ . '/classes/Month.php');
 require_once(__DIR__ . '/classes/Report.php');
+require_once(__DIR__ . '/classes/SqlReport.php');
+
+date_default_timezone_set('Europe/Amsterdam');
 
 $periods     = [3, 12, 18];
 $commissions = [0.10, 0.15];
@@ -23,51 +26,8 @@ if(isset($_GET['commission']) && in_array($_GET['commission'], $commissions)) {
 }
 
 
-// Prepare query
-$sql = <<<SQL
-SELECT
-    month,
-    count(*) as bookers,
-    printf("%.2f", avg(bookings_count)) as number_of_bookings,
-    printf("%.2f", avg(total_price)) as turnover,
-    printf("%.2f", $commission*avg(total_price)) as LTV
-FROM
-    (
-        SELECT
-            by_month.booker_id,
-            month,
-            count(booking_id) as bookings_count,
-            sum(locked_total_price) as total_price
-        FROM
-            (   -- Selecting bookers with first booking month
-                SELECT
-                    booker_id,
-                    min(i.end_timestamp) as first_booking_timestamp,
-                    strftime('%Y-%m', datetime(min(i.end_timestamp), 'unixepoch')) as month
-                FROM
-                    bookings b
-                JOIN
-                    bookingitems i
-                ON (i.booking_id=b.id)
-                GROUP BY
-                    b.booker_id
-            ) as by_month
-        JOIN
-            bookings b
-            ON (b.booker_id = by_month.booker_id)
-        JOIN
-            bookingitems i
-            ON (i.booking_id=b.id AND i.end_timestamp < strftime('%s', date(datetime(by_month.first_booking_timestamp, 'unixepoch'), '+$period month')))
-        GROUP BY
-            by_month.booker_id,
-            month
-    ) as grouped
-GROUP BY
-    month
-ORDER BY
-    month
-SQL;
-$result = $db->prepare($sql)->run();
+$result = new SqlReport($db, $period, $commission);
+$result->run();
 
 
 ?>
@@ -119,9 +79,9 @@ $result = $db->prepare($sql)->run();
 			<tbody>
 				<?php foreach ($result as $index => $row): ?>
 					<tr>
-						<td><?php echo $row->month;?></td>
+						<td><?php echo $row->label;?></td>
 						<td><?php echo $row->bookers;?></td>
-						<td class="right"><?php echo $row->number_of_bookings;?></td>
+						<td class="right"><?php echo $row->bookings;?></td>
 						<td class="right"><?php echo $row->turnover;?></td>
 						<td class="right"><?php echo $row->LTV;?></td>
 					</tr>
