@@ -21,12 +21,52 @@ if(isset($_GET['commission']) && in_array($_GET['commission'], $commissions)) {
 
 
 // Prepare query
-$result = $db
-	->prepare('
-		SELECT * FROM bookings LIMIT 3
-	')
-	->run()
-;
+$sql = <<<SQL
+SELECT
+    month,
+    count(*) as bookers,
+    avg(bookings_count) as number_of_bookings,
+    avg(total_price) as turnover,
+    0.1*avg(total_price) as LTV
+FROM
+    (
+        SELECT
+            by_month.booker_id,
+            month,
+            count(booking_id) as bookings_count,
+            sum(locked_total_price) as total_price
+        FROM
+            (   -- Selecting bookers with first booking end month
+                SELECT
+                    booker_id,
+                    min(i.end_timestamp) as first_booking_timestamp,
+                    strftime('%Y-%m', datetime(min(i.end_timestamp), 'unixepoch')) as month
+                FROM
+                    bookings b
+                JOIN
+                    bookingitems i
+                ON (i.booking_id=b.id)
+                GROUP BY
+                    b.booker_id
+            ) as by_month
+        JOIN
+            bookings b
+            ON (b.booker_id = by_month.booker_id)
+        JOIN
+            bookingitems i
+            ON (i.booking_id=b.id AND i.end_timestamp < by_month.first_booking_timestamp+86400*30*18)
+        GROUP BY
+            by_month.booker_id,
+            month
+    ) as grouped
+GROUP BY
+    month
+ORDER BY
+    month
+SQL;
+$result = $db->prepare($sql)->run();
+
+
 ?>
 <!doctype html>
 <html>
@@ -76,11 +116,11 @@ $result = $db
 			<tbody>
 				<?php foreach ($result as $index => $row): ?>
 					<tr>
-						<td>TODO</td>
-						<td>TODO</td>
-						<td>TODO</td>
-						<td>TODO</td>
-						<td>TODO</td>
+						<td><?php echo $row->month;?></td>
+						<td><?php echo $row->bookers;?></td>
+						<td><?php echo $row->number_of_bookings;?></td>
+						<td><?php echo $row->turnover;?></td>
+						<td><?php echo $row->LTV;?></td>
 					</tr>
 				<?php endforeach; ?>
 			</tbody>
