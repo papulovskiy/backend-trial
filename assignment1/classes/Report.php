@@ -15,6 +15,14 @@ abstract class Report implements Iterator {
         $this->commission = $commission;
     }
 
+    protected function add($month, $bookers, $bookings, $turnover, $LTV) {
+        $this->items[] = new Month($month, $bookers, $bookings, $turnover, $LTV);
+    }
+
+    public function debug() {
+        var_dump($this->items);
+    }
+
     /* Iterator implementation */
     public function current() {
         return $this->items[$this->position];
