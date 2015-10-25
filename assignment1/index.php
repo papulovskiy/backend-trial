@@ -4,7 +4,7 @@
 require_once(__DIR__ . '/errors.php');
 require_once(__DIR__ . '/include.php');
 
-$periods     = [6, 12, 18];
+$periods     = [3, 12, 18];
 $commissions = [0.10, 0.15];
 
 // Default values
