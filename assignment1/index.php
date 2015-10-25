@@ -4,14 +4,26 @@
 require_once(__DIR__ . '/errors.php');
 require_once(__DIR__ . '/include.php');
 
-// Vars
+$periods     = [6, 12, 18];
+$commissions = [0.10, 0.15];
+
+// Default values
 $period = 12; // Life-Time of 12 months
 $commission = 0.10; // 10% commission
+
+// Checking arguments
+if(isset($_GET['period']) && in_array($_GET['period'], $periods)) {
+	$period = (int) $_GET['period'];
+}
+if(isset($_GET['commission']) && in_array($_GET['commission'], $commissions)) {
+	$commission = (float) $_GET['commission'];
+}
+
 
 // Prepare query
 $result = $db
 	->prepare('
-		SELECT * FROM bookings
+		SELECT * FROM bookings LIMIT 3
 	')
 	->run()
 ;
@@ -41,6 +53,15 @@ $result = $db
 		</style>
 	</head>
 	<body>
+		<form method="get">
+			Period: <select name="period"><?php echo implode('', array_map(function($p) use ($period) {
+				return sprintf('<option value="%d" %s>%d months</option>', $p, $p === $period ? 'selected' : '', $p);
+			}, $periods)); ?></select><br/>
+			Commission: <select name="commission"><?php echo implode('', array_map(function($c) use ($commission) {
+				return sprintf('<option value="%f" %s>%d %%</option>', $c, $c === $commission ? 'selected' : '', $c*100);
+			}, $commissions)); ?></select><br/>
+			<button type="submit">Generate</button>
+		</form>
 		<h1>Report:</h1>
 		<table class="report-table">
 			<thead>
