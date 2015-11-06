@@ -51,10 +51,9 @@ class CodeReport extends Report {
         $maximum_first_date = (new DateTime())
                                 ->sub(new DateInterval('P' . $this->period . 'M'))
                                 ->modify('midnight')
-                                ->modify('+1 day')
                                 ->format("U");
         foreach($bookers as $id => $booker) {
-            if($booker['first_booking'] > $maximum_first_date) {
+            if($booker['first_booking'] >= $maximum_first_date) {
                 continue;
             }
             $maximum_day = (new DateTime('@' . $booker['first_booking']))
@@ -69,7 +68,6 @@ class CodeReport extends Report {
                     foreach($bkngs as $id => $v) {
                         $booker_bookings[$id] = $v;
                     }
-                    // $booker_bookings += count($bkngs);
                     $booker_sum += $booker['sum'][$day];
                 }
             }
