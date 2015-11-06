@@ -9,7 +9,7 @@ require_once(__DIR__ . '/classes/Report.php');
 require_once(__DIR__ . '/classes/CodeReport.php');
 require_once(__DIR__ . '/classes/SqlReport.php');
 
-date_default_timezone_set('Europe/Amsterdam');
+date_default_timezone_set('Europe/London');
 
 $periods     = [3, 12, 18];
 $commissions = [0.10, 0.15];
