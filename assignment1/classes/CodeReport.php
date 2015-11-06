@@ -37,30 +37,40 @@ class CodeReport extends Report {
             }
 
             // I'd consider here that "average number of bookings" in the report is actually number of bookings, not items
-            $month = (int) date("Ym", $item->end_timestamp); // month here is for grouping by months
-            $booker['bookings'][$month][$booking->id] = 1;
-            if(!isset($booker['sum'][$month])) {
-                $booker['sum'][$month] = 0;
+            $day = (int) date("Ymd", $item->end_timestamp); // for grouping
+            $booker['bookings'][$day][$booking->id] = 1;
+            if(!isset($booker['sum'][$day])) {
+                $booker['sum'][$day] = 0;
             }
-            $booker['sum'][$month] += $item->locked_total_price;
+            $booker['sum'][$day] += $item->locked_total_price;
         }
 
 
         // Mix it!
         $today = (int) date("Ym");
+        $maximum_first_date = (new DateTime())
+                                ->sub(new DateInterval('P' . $this->period . 'M'))
+                                ->modify('midnight')
+                                ->modify('+1 day')
+                                ->format("U");
         foreach($bookers as $id => $booker) {
-            $first_month  = (int) date("Ym", $booker['first_booking']);
-            if($today - $first_month < $this->period) {
+            if($booker['first_booking'] > $maximum_first_date) {
                 continue;
             }
+            $maximum_day = (new DateTime('@' . $booker['first_booking']))
+                                ->add(new DateInterval('P' . $this->period . 'M'))
+                                ->format("Ymd");
             $report_month = date("Y-m", $booker['first_booking']);
-            $booker_bookings = 0;
+            $booker_bookings = [];
             $booker_sum = 0;
             // Filtering only bookings for period
-            foreach($booker['bookings'] as $month => $bkngs) {
-                if($month - $first_month <= $this->period) {
-                    $booker_bookings += count($bkngs);
-                    $booker_sum += $booker['sum'][$month];
+            foreach($booker['bookings'] as $day => $bkngs) {
+                if($day <= $maximum_day) {
+                    foreach($bkngs as $id => $v) {
+                        $booker_bookings[$id] = $v;
+                    }
+                    // $booker_bookings += count($bkngs);
+                    $booker_sum += $booker['sum'][$day];
                 }
             }
             $report[$report_month]['bookers'][$id] = [ 'bookings' => $booker_bookings, 'sum' => $booker_sum ];
@@ -73,7 +83,7 @@ class CodeReport extends Report {
         sort($rows);
         foreach($rows as $month) {
             $bookers_count  = count($report[$month]['bookers']);
-            $bookings_count = array_sum(array_map(function($i) { return $i['bookings']; }, $report[$month]['bookers']));
+            $bookings_count = array_sum(array_map(function($i) { return count($i['bookings']); }, $report[$month]['bookers']));
             $bookings_sum   = array_sum(array_map(function($i) { return $i['sum']; }, $report[$month]['bookers']));
             $this->add(
                         $month,
